@@ -18,7 +18,6 @@
 | **Pablo Castilla** | _pablo.castilla@mi.unc.edu.ar_ |
 | **Javier A. Fatu** | _javier.fatu@mi.unc.edu.ar_ |
 | **Enzo L. Laura Surco** | _enzo.laura.surco@mi.unc.edu.ar_ |
-| **Nicolas Melia** | _nicolas.melia@mi.unc.edu.ar_ |
 | **Saqib D. Mohammad Cabrejos** | _saqib.mohammad@mi.unc.edu.ar_ |
 
 

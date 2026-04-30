@@ -125,6 +125,11 @@ La conexión desde el cliente se estableció de forma análoga al punto anterior
 
 ![Mensaje-UDP](https://hackmd.io/_uploads/BkKpJYgAbe.png)
 
+#### c)​ Conectarse a otra VM (mantener dos sesiones en dos terminales distintas) y establecer conexión con netcat entre ellas. Documentar un ida y vuelta de frases al estilo chat entre las instancias.
+
+Para esta actividad se utilizó la VM correspondiente a PC-4 como nodo central de la comunicación, configurada como broker mediante `ncat`. A partir de allí, se conectaron las VMs de PC-3, PC-2 y PC-1 al mismo servicio, lo que permitió establecer una conversación tipo chat entre las distintas instancias. De este modo, se verificó que los mensajes enviados desde cada máquina fueran reenviados a las demás participantes, reproduciendo un intercambio de mensajes entre varias instancias a través de una conexión TCP establecida con `ncat`.
+
+![Conexion-VMs](https://hackmd.io/_uploads/rJ-LaG-RWl.png)
 
 ### 5) Navegar a la carpeta de su grupo (la que crearon en el ítem 2). Crear un archivo index.html dentro con un mensaje dentro al estilo “Hola Mundo”. Pero sean más creativos... Luego, desplieguen un servidor HTTP:
 
@@ -157,10 +162,31 @@ Al igual que en los pasos anteriores, se capturó el tráfico generado durante e
 
 ![PaqueteHTTP](https://hackmd.io/_uploads/SynUQYeA-e.png)
 
-
-
 Conclusión: Se comprobó que, al utilizar el protocolo HTTP en lugar de HTTPS, la información viaja sin cifrar. Con herramientas como Wireshark, es posible descifrar el contenido del mensaje en texto plano, lo que implica que el tráfico también es susceptible de ser intervenido o modificado.
 
+### Pasaje de archivo HTML entre VMs y captura en Wireshark
+
+Para demostrar la viabilidad de enviar archivos sin cifrar mediante TCP y su posterior análisis, se procedió a transferir el archivo `index.html` desde PC-2 hacia PC-4. Dado que el tráfico entre ambas VMs ocurre internamente en la nube del proveedor (Google y Azure) y no pasa por nuestra máquina local, la captura de red se realizó directamente en la VM receptora (PC-4) utilizando `tcpdump`.
+
+El procedimiento consistió en los siguientes comandos:
+1. En **PC-4** se inició la captura de tráfico en el puerto 5003: `sudo tcpdump -i any -w ~/TheLordsOfPings/captura.pcap tcp port 5003`
+2. En otra terminal de **PC-4**, se dejó a `ncat` escuchando y redirigiendo la salida al archivo destino: `ncat -l 5003 > ~/TheLordsOfPings/index.html`
+3. En **PC-2**, se leyó el archivo local y se envió a través de la red hacia PC-4: `cat ~/TheLordsOfPings/index.html | ncat 34.130.32.165 5003`
+4. Finalmente, desde la **máquina local** se descargó el archivo resultante mediante `scp` para su análisis visual: `scp -i [ruta_clave] pc-alumnos-4@34.130.32.165:~/TheLordsOfPings/captura.pcap ./capture.pcap`
+
+![Terminales de Transferencia y Captura](https://hackmd.io/_uploads/S1wXiVW0-l.png)
+
+Al abrir el archivo `capture.pcap` localmente con Wireshark y aplicar el filtro `tcp.port == 5003`, observamos el establecimiento de la conexión TCP (Handshake) seguido del envío de los datos. 
+
+Un aspecto técnico interensante que destacamos en el análisis es la **segmentación de TCP**. Dado que el peso del archivo `index.html` (alrededor de 3.2K) superaba el tamaño máximo de segmento permitido para un solo paquete en la red, TCP dividió el código fuente del documento en dos paquetes distintos para su transmisión:
+
+1. **Primer paquete de datos (Punto de captura 4):** Contiene los primeros 2816 bytes de payload. En su formato de texto plano inspeccionado, se puede visualizar claramente el inicio de la estructura del documento con la etiqueta `<!DOCTYPE html>`.
+![Wireshark Captura Parte 1](https://hackmd.io/_uploads/ByYri4WAZg.png)
+
+2. **Segundo paquete de datos (Punto de captura 5):** Transporta los 436 bytes restantes del archivo, en donde logramos confirmar el fin del envío al observarse el cierre de las etiquetas `</footer></body></html>`.
+![Wireshark Captura Parte 2](https://hackmd.io/_uploads/SJFVi4ZA-g.png)
+
+Esto nos reafirma que, al transmitir datos en texto plano mediante HTTP o herramientas como Netcat, cualquier intruso con acceso a la red puede interceptar y reconstruir la comunicación en su totalidad. Además, al visualizar la fragmentación de los datos en distintos paquetes (segmentación TCP), se evidencia cómo la Capa de Transporte fragmenta la información subyacentemente, resaltando la necesidad de aplicar cifrado (como HTTPS o SSH) para garantizar la confidencialidad de la información compartida, incluso cuando los datos se envíen fragmentados.
 
 ### 6) Ver el siguiente video de Veritasium en YouTube: **https://www.youtube.com/watch?v=PPJ6NJkmDAo**
 

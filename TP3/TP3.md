@@ -126,9 +126,6 @@ La conexión desde el cliente se estableció de forma análoga al punto anterior
 ![Mensaje-UDP](https://hackmd.io/_uploads/BkKpJYgAbe.png)
 
 
-#### c) Conectarse a otra VM (mantener dos sesiones en dos terminales distintas) y establecer conexión con netcat entre ellas. Documentar un ida y vuelta de frases al estilo chat entre las instancias.
---
-
 ### 5) Navegar a la carpeta de su grupo (la que crearon en el ítem 2). Crear un archivo index.html dentro con un mensaje dentro al estilo “Hola Mundo”. Pero sean más creativos... Luego, desplieguen un servidor HTTP:
 
 Utilizando el editor de texto nano, se modificó el archivo index.html creado en el ítem 2 para estructurar una página web sencilla. Luego, se desplegó un servidor HTTP básico escuchando en el rango de puertos habilitados (ej. 5001/5003) con el siguiente comando:

@@ -1,17 +1,28 @@
 import socket
 import json
 
-HOST = "127.0.0.1"
-PORT = 5000
 
-message = {
-    "nombre": "XxNETMASTERSxX",
-    "que_digo": "Hello Worldo!"
-}
+HOST = "34.68.162.122"
+PORT = 5050
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((HOST, PORT))
 
-client.sendall(json.dumps(message).encode("utf-8"))
 
-client.close()
+while True:
+    user_input = input("Ingresa tu mensaje (o escribe 'adios' para salir): ")
+    
+    if user_input.strip().lower() == 'adios':
+        print("Cerrando conexión...")
+        client.close()
+        break
+
+    message = {
+        "group": "The Lords of Pings",
+        "payload": user_input
+    }
+
+    client.sendall(json.dumps(message).encode("utf-8"))
+
+
+ 

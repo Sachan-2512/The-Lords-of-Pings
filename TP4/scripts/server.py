@@ -3,11 +3,11 @@ import threading
 import json
 from cryptography.fernet import Fernet
 
-# Esta clave DEBE ser exactamente la misma que usa el cliente
+
 CLAVE_COMPARTIDA = b'x_Yh5A9gO7tW_yRQ1P7w8Y6y2m_zS4w-1Sg1jA4U0o8='
 cipher = Fernet(CLAVE_COMPARTIDA)
 
-HOST = "127.0.0.1"  # Permite recibir conexiones desde cualquier IP en la red
+HOST = "127.0.0.1"  
 PORT = 5050
 BUFFER_SIZE = 1024
 

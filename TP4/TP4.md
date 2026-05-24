@@ -27,100 +27,142 @@
 
 #### a) ¿Qué es la serialización en redes de computadoras?
 
-La serialización es el proceso de convertir una estructura de datos compleja o el estado de un objeto (que vive en la memoria RAM de tu programa, con sus punteros y referencias) en un formato lineal estándar que pueda ser fácilmente transmitido a través de una red o almacenado en un archivo.
+La serialización es el proceso de transformar una estructura de datos compleja o el estado de un objeto (alojado en la memoria RAM con sus respectivos punteros y referencias) en un formato lineal estandarizado. Este formato permite que la información sea transmitida de forma eficiente a través de una red o almacenada de forma persistente.
 
-Imagina que tienes un mueble armado en tu casa (tu objeto en memoria). No puedes enviarlo por correo así como está porque ocupa mucho espacio y tiene una forma irregular. La serialización equivale a desarmar ese mueble, guardar las piezas de forma ordenada en una caja plana (secuencia de bytes) y enviarlo. El destinatario, al recibir la caja, hace el proceso inverso (deserialización) para volver a armar el mueble y poder usarlo.
+A modo de analogía, imagina que tienes un mueble ensamblado en tu casa (el objeto en memoria) y deseas enviarlo por correo. Dado que su volumen y forma irregular complican el transporte, la solución práctica es desarmarlo. La serialización equivale a desmontar este mueble y empaquetar sus piezas ordenadamente en una caja plana (una secuencia de bytes) para su envío. Al recibir el paquete, el destinatario realiza el proceso inverso (deserialización) para ensamblar el mueble y lograr utilizarlo.
 
-Dado que los cables de red solo entienden un flujo de bits/bytes, la serialización es el puente que permite que un programa escrito en Python pueda enviarle un diccionario complejo a un programa escrito en C++ y que ambos se entiendan perfectamente.
+Dado que el medio físico de transmisión de la red opera exclusivamente con un flujo de bits, la serialización actúa como el mecanismo de traducción que permite, por ejemplo, que un diccionario de datos complejo generado en Python sea transmitido, recibido e interpretado correctamente por una aplicación desarrollada en C++.
+
+![serial-deserial](https://hackmd.io/_uploads/HJSlbs0kfx.png)
+
+_**Figura 1.** Serialización y deserialización de objetos a XML en diferentes lenguajes de programación_
 
 #### b) ¿Cuál es la diferencia entre serialización binaria y no binaria? Buscar ejemplos, ventajas y desventajas de cada una.
 
-La diferencia principal radica en cómo se codifican esos bytes resultantes. La serialización no binaria (también llamada basada en texto) prioriza que el mensaje sea legible por humanos, mientras que la binaria prioriza la eficiencia y velocidad de las máquinas.
+La distinción fundamental entre ambos enfoques reside en la codificación de los datos. La serialización no binaria (o basada en texto) prioriza la legibilidad del mensaje para el ser humano, mientras que la serialización binaria se enfoca en maximizar la eficiencia computacional y la velocidad de transmisión.
 
-Aquí tienes la comparativa detallada:
+A continuación, se detalla la comparativa técnica entre ambas alternativas:
 
-Serialización No Binaria (Basada en Texto)
+**Serialización No Binaria (Basada en Texto)**
 
-* Codifica los datos utilizando caracteres estándar (generalmente en ASCII o UTF-8).
-
-* Ejemplos comunes: JSON, XML, YAML.
-
-**Ventajas:**
-
-Legibilidad humana: Si interceptas el paquete en la red o lo imprimes en consola, puedes leer y entender exactamente qué datos viajan (muy útil para depurar errores).
-
-Universalidad: Prácticamente todos los lenguajes de programación tienen librerías nativas o muy accesibles para procesar texto plano.
-
-**Desventajas:**
-
-* Mayor tamaño (Overhead): Ocupa mucho más espacio en la red porque requiere caracteres extra para la estructura (como las llaves {} y comillas "" en JSON).
-
-* Lentitud de procesamiento: Convertir texto plano a tipos de datos nativos (como transformar la cadena de texto "12345" a un número entero real en la memoria) consume más ciclos de CPU.
-
-Serialización Binaria
-
-* Codifica los datos directamente en un formato compacto de ceros y unos, optimizado matemáticamente, sin preocuparse por representar caracteres legibles.
-
-* Ejemplos comunes: Protocol Buffers (Protobuf de Google), MessagePack, BSON (usado por MongoDB), FlatBuffers.
+* Emplea esquemas de codificación de caracteres estándar (comúnmente ASCII o UTF-8).
+* **Ejemplos comunes:** JSON, XML, YAML.
 
 **Ventajas:**
 
-* Eficiencia de tamaño: El payload es muchísimo más pequeño. Un número entero gigante viaja simplemente como sus 4 u 8 bytes correspondientes, en lugar de un carácter por cada dígito.
-
-* Alta velocidad: El proceso de serializar y deserializar es rapidísimo porque los datos ya vienen en un formato muy cercano a como la CPU los maneja en memoria.
+* **Legibilidad humana:** Permite la inspección visual directa del tráfico de red o de los archivos generados, facilitando considerablemente las tareas de depuración (_debugging_).
+* **Alta compatibilidad:** La mayoría de los lenguajes de programación modernos incluyen soporte nativo o librerías estandarizadas para el análisis sintáctico (_parsing_) de texto plano.
 
 **Desventajas:**
 
-* Ilegible para humanos: Si miras el paquete en crudo, solo verás caracteres basura o símbolos extraños. Requiere herramientas especiales para decodificarlo y leerlo.
+* **Mayor tamaño de carga útil (_Overhead_):** Requiere un mayor volumen de datos para su transmisión debido a la inclusión obligatoria de caracteres sintácticos o estructurales (como llaves `{}` o comillas `""` en JSON).
+* **Mayor costo de procesamiento:** La conversión de secuencias de texto a tipos de datos nativos en memoria demanda una cantidad superior de ciclos de CPU, ralentizando el proceso.
 
-* Mayor complejidad de implementación: Generalmente requiere definir un "esquema" o contrato estricto previo entre el cliente y el servidor para que ambos sepan exactamente en qué byte empieza y termina cada variable.
+**Serialización Binaria**
 
-### 2) Desplegaremos un servidor TCP multi-hilo: 
+* Transforma los datos directamente a un formato de bytes compacto y matemáticamente optimizado, prescindiendo de caracteres imprimibles.
+* **Ejemplos comunes:** Protocol Buffers (Protobuf de Google), MessagePack, BSON (utilizado por MongoDB), FlatBuffers.
 
-**- Se realiza esta actividad de forma presencial, lo desplegamos en una PC virtual en clases que usaremos entre todos.**
+**Ventajas:**
 
-#### a) Serializaremos nuestros paquetes en JSON
+* **Eficiencia espacial:** Reduce drásticamente el tamaño de la _payload_. Por ejemplo, un número entero de gran magnitud se transmite empleando sus respectivos 4 u 8 bytes, en lugar de incurrir en el costo de un byte por cada dígito decimal.
+* **Alta velocidad de ejecución:** Los procesos de serialización y deserialización son notablemente ágiles, dado que la estructura de los datos transmitidos se aproxima significativamente a su representación nativa en la memoria RAM.
 
-Se crea entonces un archivo al cual llamaremos paquete.json, el mismo debe tener un contenido similar a:
+**Desventajas:**
 
+* **Ilegibilidad directa:** El flujo de datos capturado carece de sentido para un observador no asistido y se visualiza como un conjunto de caracteres sin formato. Su interpretación exige el uso de herramientas de decodificación específicas.
+* **Complejidad de implementación:** Usualmente demanda la definición técnica de un "esquema" estricto (o contrato previo) entre el cliente y el servidor, indispensable para establecer los límites y el tipo de dato de cada variable transmitida.
+
+```mermaid
+flowchart TD
+    %% Generación de objeto en memoria RAM
+    Memoria[Objeto en Memoria RAM<br/>x = 12345]
+
+    %% Ramificación
+    Memoria -- "No Binaria / Texto" --> NoBinaria
+    Memoria -- "Binaria" --> Binaria
+
+    subgraph snb ["Serialización Textual (JSON, XML)"]
+        NoBinaria["Conversión a<br/>caracteres"]
+        TextoJSON["{ valor: 12345 }<br/>(Ej: 17 bytes)"]
+        ProTexto["✅ Alta compatibilidad<br/>✅ Fácil de leer y depurar"]
+        ConTexto["❌ Mayor tamaño en red<br/>❌ Parsing lento por CPU"]
+        
+        NoBinaria --> TextoJSON --> ProTexto --> ConTexto
+    end
+
+    subgraph sb ["Serialización Binaria (Protobuf, MessagePack)"]
+        Binaria["Conversión a mapa<br/>de bits nativo"]
+        BytesBinarios["00110000 00111001<br/>(Ej: 4 bytes)"]
+        ProBin["✅ Tamaño ultracompacto<br/>✅ Procesamiento veloz"]
+        ConBin["❌ Ilegible para humanos<br/>❌ Exige contrato estricto"]
+        
+        Binaria --> BytesBinarios --> ProBin --> ConBin
+    end
+
+    %% Deserialización
+    ConTexto --> Red(("Transmisión global<br/>en Red"))
+    ConBin --> Red
+
+    Red -- "Recepción y<br/>Deserialización" --> Destino["Objeto Reconstruido<br/>en CPU Destino"]
 ```
+
+### 2) Despliegue de un servidor TCP multi-hilo
+
+_Nota: Esta actividad se realizó de forma presencial, conectándonos a un servidor desplegado sobre una máquina virtual en clase para uso compartido._
+
+#### a) Serialización de paquetes en formato JSON y envío mediante PacketSender
+
+Para interactuar con el servidor, estructuramos los datos a enviar utilizando el formato JSON. Con ese propósito, creamos un archivo local denominado `payload.json` con la siguiente estructura:
+
+```json
 {
-"group": "The Lords of Pings",
-"payload": "Jueves 14 de Mayo TP4"
+  "group": "The Lords of Pings",
+  "payload": "Jueves 14 de Mayo TP4"
 }
 ```
-Las claves del paquete JSON group y payload deben ser nombradas de esa forma debido a que el servidor solo esta programado para recibir la infromacion de esa forma.
 
-#### Y lo enviaremos utilizando PacketSender; 
+Es importante destacar que las claves del objeto JSON (`group` y `payload`) deben respetar estrictamente esta nomenclatura, ya que la lógica del servidor está programada para parsear y validar la información bajo ese esquema específico.
 
-#### Se recomienda tildar “persistent TCP” (puede no ser necesario en algunos casos) así no se abre y cierra conexión cada que se envía un mensaje:
-Nombramos nuestro paquete, cargamos el paquete.json en ASCII y nuestro profesor de la materia quien levanto el servidor, nos provee la IP y el numero de puerto: 34.68.162.122 y 5050 respectivamente
+**Configuración y envío a través de PacketSender**
 
-![image](https://hackmd.io/_uploads/BycvB5mkMx.png)
+Para realizar la transmisión de los datos, empleamos la herramienta PacketSender. Durante la configuración, asignamos un nombre a nuestro paquete e ingresamos su contenido en formato ASCII. Adicionalmente, configuramos los parámetros de red provistos por la VM del profesor para alcanzar el servidor (Dirección IP: `34.68.162.122`, Puerto: `5050`). 
 
-Podemos verficar el contenido de nuestro paquete:
+Se optó por habilitar la opción _"Persistent TCP"_ para mantener la conexión abierta luego de enviar el primer paquete, evitando la sobrecarga (Handshake) de abrir y cerrar conexiones TCP por cada mensaje subsiguiente.
 
-![image](https://hackmd.io/_uploads/Sy8YB5Qyfx.png)
+![Configuración PacketSender](https://hackmd.io/_uploads/BycvB5mkMx.png)
 
-Y aqui verificamos correctamente que el paquete fue recibido por el servidor quien tambien nos envia mensajes de respuesta o "bienvenida".
+_**Figura 2.** Configuración de los parámetros de transmisión TCP en PacketSender._
 
-![image](https://hackmd.io/_uploads/ByM41Arkzg.png)
-![image](https://hackmd.io/_uploads/BkSr1CH1zl.png)
+Utilizando el editor multilínea de PacketSender, pudimos corroborar de antemano que la carga útil (payload) mantuviera su estructura JSON intacta antes de salir a la red:
+
+![Verificación del payload en PacketSender](https://hackmd.io/_uploads/Sy8YB5Qyfx.png)
+
+_**Figura 3.** Verificación estructural del payload JSON previo a su envío._
+
+Finalmente, al ejecutar el envío, validamos el éxito de la comunicación. Como se aprecia en la captura de la consola del servidor general, este último recibió íntegro nuestro paquete, logró deserializarlo y nos respondió satisfactoriamente confirmando la recepción y mostrando en pantalla lo emitido por nuestro grupo.
+
+![Respuesta del servidor - Vista 1](https://hackmd.io/_uploads/ByM41Arkzg.png)
+
+_**Figura 4.** Recepción exitosa del paquete por parte del servidor._
+
+![Respuesta del servidor - Vista 2](https://hackmd.io/_uploads/BkSr1CH1zl.png)
+
+_**Figura 5.** Recepción exitosa de un nuevo paquete por parte del servidor._
 
 
-### 3) Programaremos ahora una aplicación de cliente que nos permita enviar mensajes al servidor a través de una consola.
+### 3) Desarrollo de una aplicación cliente por consola
 
-En esta etapa nuestro grupo como cliente escribio un pequeño script en python para poder, con ayuda de las librerias socket y json(para serializar la informacion)
+En esta etapa, nuestro grupo desarrolló un _script_ en Python que actúa como cliente. Para lograrlo, hicimos uso de las librerías nativas `socket` (para manejar la comunicación de red) y `json` (para serializar la información antes de transmitirla).
 
+#### a) Configuración de IP, puerto y establecimiento de la conexión
 
-#### a) Nuestro cliente deberá poder configurarse con la IP y puerto de destino del servidor, estableciendo conexión con el mismo.
+El cliente debe instanciar un socket TCP (IPv4) y apuntar hacia la dirección y el puerto donde el servidor se encuentra escuchando. 
 
-```
+```python
 import socket
 import json
-.
-.
-.
+
 HOST = "34.68.162.122"  
 PORT = 5050          
 
@@ -128,60 +170,77 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect((HOST, PORT))
 ```
 
-![image](https://hackmd.io/_uploads/HkLNo57yzx.png)
+#### b) Serialización de la información al formato admitido por el servidor
 
-#### b) Nuestro cliente deberá serializar la información previo al envío de la misma, en el formato que el servidor admite.
+Puesto que la lógica del servidor exige que el ingreso de datos esté bajo la estructura de un documento JSON específico, empaquetamos la entrada del usuario en un diccionario de Python y utilizamos la función `json.dumps()` para serializarlo a texto, antes de codificarlo a binario y enviarlo por la red.
 
-Como sabemos ya el servidor acepta la informacion serializada en JSON por ende haremos uso de la libreria JSON en python para darle un formato al mensaje previo al envio.
-
-```
+```python
 message = {
+    "group": "The Lords of Pings",
+    "payload": user_input
+}
+
+client.sendall(json.dumps(message).encode("utf-8"))
+```
+
+#### c) Ejecución del cliente y verificación de entrega
+
+El _script_ está diseñado con un bucle continuo (`while True`) que, tras establecer la conexión, solicita texto por consola para enviarlo iterativamente. Este enfoque de interacción bidireccional continua nos aproxima a la dinámica de un chat.
+
+```python
+while True:
+    user_input = input("Ingresa tu mensaje (o escribe 'adios' para salir): ")
+
+    if user_input.strip().lower() == 'adios':
+        print("Cerrando conexión...")
+        client.close()
+        break
+
+    message = {
         "group": "The Lords of Pings",
-        "payload": user_input_encrypted.decode("utf-8")
+        "payload": user_input
     }
 
     client.sendall(json.dumps(message).encode("utf-8"))
 ```
 
-![image](https://hackmd.io/_uploads/Skdri5XJfe.png)
+Al ejecutar el comando en la terminal, se establece la conexión TCP y el cliente se pone a la escucha aguardando interactividad.
 
-#### c) Ejecutar nuestro cliente y verificar que los mensajes enviados lleguen correctamente al servidor.
+![Terminal a la espera de input](https://hackmd.io/_uploads/B1Lti5QJGl.png)
 
-NUestro esta configurado para que primero establezca una conexion con el servidor y en ese momemtno podemos enviar un mensaje cualquiera por consola que sera serializado en JSON y pueda ser recibido por el servidor. Lo que se busco es una interaccion Cliente-Servidor tipo chat(para asi tener una aproximacion al proximo trabajo practico).
+_**Figura 6.** Inicialización del cliente en consola esperando la primera entrada del usuario._
 
-![image](https://hackmd.io/_uploads/BJeKIs5QkMe.png)
+Luego, transmitimos un conjunto de mensajes de prueba ("hello chicos", "buena suerte a todos", etc.) para validar la fiabilidad de la conexión bidireccional, manteniendo la sesión TCP abierta y finalizando el intercambio con la palabra clave de escape.
 
-![image](https://hackmd.io/_uploads/B1Lti5QJGl.png)
+![Intercambio de mensajes](https://hackmd.io/_uploads/rJZ3jcX1Mx.png)
 
-Redactamos algunos mensajes de paz y amor para el servidor.
+_**Figura 7.** Transmisión interactiva de múltiples paquetes secuenciales y proceso de cierre de conexión._
 
-![image](https://hackmd.io/_uploads/rJZ3jcX1Mx.png)
+Finalmente, verificamos la salida de la pantalla del servidor operado por la VM del profesor. Como se evidencia en la imagen, los paquetes alcanzaron su destino por la red, el servidor fue capaz de deserializar correctamente el campo `payload` y registró los mensajes en su salida estándar, validando con éxito el funcionamiento de nuestro cliente.
 
-Comprobamos la recepcion mediante la terminal del servidor y podemos observar que los mensajes son recibidos y procesados por el servidor y por ende nos respondera con mensajes de bienvenida.
+![Recepción exitosa en el servidor](https://hackmd.io/_uploads/ryh4MkIkMx.jpg)
 
-![WhatsApp Image 2026-05-14 at 4.00.25 PM](https://hackmd.io/_uploads/ryh4MkIkMx.jpg)
-
-
+_**Figura 8.** Consola del servidor docente recibiendo y procesando en tiempo real los mensajes del grupo._
 
 ### 4) Vamos a imbuir un poco de seguridad en nuestro sistema. Investiga e implementa alguna técnica de encriptación que te guste e implementar para cifrar la payload, SOLO LA PAYLOAD, de tu mensaje.
 
-EL sistema que se decidio implementar es AES, con encriptacion simetrica de nuestro payload. Para nuestro codigo en python instalaremos la librearia cryptography y haremos uso de "fernte" para la generacion de la clave y el cifrado del payload en cada mensaje al cual enviaremos.
+El mecanismo de seguridad seleccionado es **AES (Advanced Encryption Standard)**, implementado a través de un esquema de cifrado simétrico. Para llevar esto a cabo en Python, empleamos la librería `cryptography`, haciendo uso de la clase `Fernet`. Este módulo de alto nivel nos garantiza que el mensaje encriptado —protegido mediante AES en modo CBC y validado con HMAC— no pueda ser manipulado ni descifrado sin la clave correspondiente.
 
-Usaremos el comando de instalacion dentro de una libraria virtual:
-```
+Instalamos la dependencia dentro de nuestro entorno virtual (`.venv/`) con el siguiente comando:
+```bash
 pip install cryptography
 ```
 
 #### a) Implementa el cifrado en el lado del cliente.
 
-Y nuestro codigo ya con la libreria implementada seria:
+A continuación, incorporamos el cifrado en nuestra aplicación cliente. En esta primera aproximación, el cliente genera una clave simétrica aleatoria para la sesión, la cual utiliza para encriptar exclusivamente el texto ingresado antes de empaquetarlo en el JSON y enviarlo por la red.
 
-```
+```python
 import socket
 import json
 from cryptography.fernet import Fernet
 
-
+# Generación de una clave simétrica efímera y creación del objeto cifrador
 clave = Fernet.generate_key()
 cipher = Fernet(clave)
 
@@ -193,6 +252,8 @@ client.connect((HOST, PORT))
 
 while True:
     user_input = input("Ingresa tu mensaje (o escribe 'adios' para salir): ")
+    
+    # Encriptamos la cadena (previamente codificada a flujo de bytes)
     user_input_encrypted = cipher.encrypt(user_input.encode("utf-8"))
 
     if user_input.strip().lower() == 'adios':
@@ -202,65 +263,129 @@ while True:
 
     message = {
         "group": "The Lords of Pings",
+        # Decodificamos el resultado (bytes) a string para usarlo mediante JSON
         "payload": user_input_encrypted.decode("utf-8")
     }
 
     client.sendall(json.dumps(message).encode("utf-8"))
-
 ```
 
-Y enviamos algunos mensajes que en nuetro punto de vista podemos leerlo y podemos entenderlo desde el lado del cliente.
+Al ejecutar este cliente modificado, ingresamos los mensajes por consola tal como lo hacíamos en las pruebas anteriores. Desde la perspectiva del usuario emisor, la interacción se percibe idéntica a la sección 3.
 
-![image](https://hackmd.io/_uploads/SyRvR5X1Ml.png)
+![Mensajes en terminal del cliente](https://hackmd.io/_uploads/SyRvR5X1Ml.png)
+
+_**Figura 9.** Interacción en consola desde el lado emisor en texto plano._
 
 #### b) Verificar que la carga útil llega cifrada al servidor.
 
-Podemos entonces observar que desde el lado del server se logro recibir el mensaje con payload encriptado segun el formao sleccionado.
+Al revisar la salida en el servidor, comprobamos que el campo `payload` ha arribado y sido impreso como una extensa cadena de caracteres ofuscados (texto cifrado codificado en base64url). Dado que el servidor carece de la clave simétrica generada aleatoriamente por nuestro cliente, le fue matemáticamente imposible recuperar el mensaje original.
 
-![WhatsApp Image 2026-05-14 at 4.10.49 PM](https://hackmd.io/_uploads/r1rlzyI1fl.jpg)
+![Recepción de payload cifrado en servidor](https://hackmd.io/_uploads/r1rlzyI1fl.jpg)
+
+_**Figura 10.** El servidor logra parsear estructuralmente el JSON emitido por el grupo, pero refleja una "payload" ilegible debido al encriptado AES._
 
 
 #### c) Documentar las principales características de la técnica de cifrado que utilizaste.
 
-AQUI DESCRIBE EL CONCEPTO DE AES Y SUS PRINCIPALES CARACTERISTICAS. + ENTENDIENDO LO QUE ES CIFRADO SIMETRICO.
+Como se dijo al inicio de la sección 4, para proteger nuestra carga útil, implementamos **Cifrado Simétrico** utilizando el algoritmo **AES (Advanced Encryption Standard)** a través de la especificación **Fernet** (provista por la librería `cryptography`). 
 
+A continuación, detallamos los conceptos teóricos y sus principales características técnicas aplicadas a nuestro código:
+
+* **Cifrado Simétrico:** Se denomina "simétrico" porque el sistema emplea exactamente la misma clave criptográfica tanto para encriptar los datos (en el cliente) como para desencriptarlos (en el servidor). Esto implica que ambos nodos de comunicación deben conocer y compartir esta clave secreta de antemano para lograr un intercambio exitoso.
+* **Estándar AES:** Es uno de los estándares de cifrado por bloques más robustos y veloces de la actualidad. En la implementación de Fernet, AES opera con claves de 128 bits en modo **CBC (Cipher Block Chaining)**. Este modo utiliza un vector de inicialización aleatorio (IV) generado para cada operación de cifrado, garantizando que incluso si se transmite el mismo mensaje dos veces, el resultado cifrado será completamente diferente en cada ocasión, evitando la detección de patrones por parte de un atacante.
+* **Autenticación e Integridad (HMAC-SHA256):** Fernet no solo cifra la información, sino que además incorpora un mecanismo de autenticación mediante _HMAC-SHA256_, permitiendo verificar tanto la integridad como la autenticidad del mensaje recibido. De esta manera, si un tercero intercepta y modifica aunque sea un único bit del _payload_ JSON, el servidor detectará inmediatamente la alteración y rechazará el mensaje durante el proceso de validación.
+* **Formato de salida seguro:** Fernet empaqueta automáticamente la información cifrada utilizando codificación **Base64 URL-safe** (`base64url`), permitiendo transformar la secuencia de bytes cifrados en una cadena de texto compatible con estructuras JSON y transmisiones de red sin corromper el formato del mensaje.
+
+* **Abstracción segura:** El uso de Fernet simplifica la implementación segura de criptografía simétrica, ya que la librería administra automáticamente detalles críticos como la generación del IV, el padding, la autenticación y el empaquetado seguro del token cifrado, reduciendo errores comunes en implementaciones criptográficas manuales.
+
+* **Aplicación práctica en el código:**  
+  La materialización de todos estos conceptos teóricos se condensa en nuestro script en el momento exacto en el que capturamos el mensaje del usuario en el cliente y ejecutamos nuestra instrucción principal:
+
+  ```python
+  user_input_encrypted = cipher.encrypt(user_input.encode("utf-8"))
+  ```
+
+  En esta única línea se ejecutan automáticamente múltiples procesos criptográficos encadenados:
+  1. **Codificación a Binario:** El texto plano se convierte a una secuencia de bytes (`.encode("utf-8")`), requisito indispensable ya que los algoritmos criptográficos operan de forma nativa sobre datos binarios.
+  2. **Generación de IV:** El objeto `cipher` genera internamente un Vector de Inicialización aleatorio para la operación.
+  3. **Cifrado AES-CBC:** Se aplica el algoritmo de grado militar AES de 128 bits para transformar el contenido en flujo ilegible.
+  4. **Firma y Empaquetado:** Se añade la firma HMAC-SHA256 validatoria y se empaqueta el token final en formato URL-safe.
+
+---
 
 ### 5) OPCIONAL: Modifica el servidor para que sea capaz de descifrar tu carga útil. Desplega servidor y cliente en tu local, captura paquetes mostrando que los mismos están cifrados mientras viajan pero el servidor es capaz de decodificar la carga útil.
 
-Para poder realizar esto primero en un cifrado simetrcio tanto cliente como servidor deben saber la clave osea la clave que tiene el cliente la tiene el servidor y con eso puede decifrar el contenido del payload. Modificamos el servidor para que se aconfigurado localmente desde una de las computadores de uno de los miembros del grupo. Utilizando ademas un celular como router o como acces point las dos computadoras tanto la del cliente como la del servidor estaran conectadas a ese acces opoitn por ende se les asiganara una IP que sera usado como para lograr la conexion:
+Con el objetivo de validar completamente el funcionamiento del esquema de cifrado implementado, adaptamos el servidor para que fuese capaz no solo de recibir paquetes cifrados, sino también de restaurar el contenido original de la carga útil en tiempo real.
 
-Desde el lado del cliente usamos la IP de mquien sera mi server:
-![image](https://hackmd.io/_uploads/rJwGbomJfx.png)
-
-Asi tenemos que ver el coo llega el mesnaje a el seridor ya cifrado
-![image](https://hackmd.io/_uploads/BJhHZi7Jzl.png)
+Para concretar este objetivo, abandonamos el uso de claves simétricas efímeras generadas dinámicamente en cada ejecución y adoptamos una **clave criptográfica compartida estáticamente** entre cliente y servidor. Este enfoque representa el principio fundamental del cifrado simétrico: tanto el emisor como el receptor deben conocer previamente exactamente la misma clave secreta para poder cifrar y descifrar la información exitosamente.
 
 
- 
- 
- 
-no una clave aleatoria sino una fija la cueal la sabra el cliente y el servidor Como ya comprobamos que podemos realizar una conexion entre Cliente y servidor dentro de nuestra misma red, modificamos un poco nuestro codigo para agregar una clave fija que ser aocnocida por ambaas partes.
- 
- COdigo del lado del server:
- ![image](https://hackmd.io/_uploads/B11L7iQkGe.png)
- 
- con la ayuda del msiam librearia podemos desncriptar el mensaje enviado:
+#### Paso 1: Verificación de la transmisión encriptada inicial
+
+Como primera etapa de prueba, configuramos el cliente `client.py` para que apuntara directamente a la dirección IP local de nuestro server dentro de nuestra red privada.
+
+![Cliente apuntando a IP local](https://hackmd.io/_uploads/rJwGbomJfx.png)
+
+_**Figura 11.** Configuración de los parámetros del socket cliente apuntando hacia la dirección IP del servidor dentro de la red local._
+
+Una vez establecida la conexión TCP y enviados los primeros mensajes interactivos, el servidor logró recibir correctamente los paquetes JSON transmitidos por el cliente. Sin embargo, debido a que la información viajaba protegida mediante cifrado AES bajo la especificación Fernet, el contenido del campo `payload` únicamente podía visualizarse como una secuencia ilegible de caracteres codificados en Base64 URL-safe. 
+
+![Mensaje cifrado en servidor local](https://hackmd.io/_uploads/BJhHZi7Jzl.png)
+
+_**Figura 12.** El servidor recibe correctamente las estructuras JSON provenientes de la red, pero el contenido de la carga útil permanece ilegible al encontrarse con el cifrado AES._
+
+Este comportamiento valida que los datos sensibles nunca viajan en texto plano a través del canal de comunicación.
+
+#### Paso 2: Implementación de clave compartida y lógica de descifrado
+
+Para permitir que el servidor recuperase el contenido original del mensaje, definimos una variable estática `CLAVE_COMPARTIDA` tanto en el cliente como en el servidor, inicializando en ambos extremos un objeto `Fernet` utilizando exactamente la misma clave secreta.
+
+De esta manera, el cliente utiliza dicha clave para cifrar el contenido antes de transmitirlo, mientras que el servidor emplea la misma llave criptográfica para realizar el proceso inverso de descifrado.
+
+Particularmente en el servidor, adaptamos el bucle principal de procesamiento para interceptar el contenido del campo `payload`, reconstruir los bytes cifrados y ejecutar el proceso de desencriptación:
+
+```python
+# Desencriptamos el payload que envió el cliente
+try:
+    # 1. Recuperamos el string cifrado y lo convertimos nuevamente a bytes
+    payload_encriptado = message["payload"].encode("utf-8")
+    
+    # 2. Fernet ejecuta internamente múltiples validaciones de seguridad:
+    # Verifica la autenticidad e integridad del token utilizando HMAC-SHA256.
+    # Recupera automáticamente el Vector de Inicialización (IV) almacenado dentro del token cifrado.
+    # Ejecuta el algoritmo AES-128-CBC utilizando la clave compartida.
+    # Devuelve finalmente el contenido original decodificado en UTF-8.
+    payload_desencriptado = cipher.decrypt(payload_encriptado).decode("utf-8")
+    
+    # 3. El contenido vuelve a ser texto legible para la consola
+    print(f"{message['group']}: {payload_desencriptado}")
+
+except Exception as e:
+    print(f"Error al desencriptar mensaje recibido: {e}")
 ```
- # Desencriptamos el payload que envió el cliente
-                    try:
-                        # Convertimos el string nuevamente a bytes, desencriptamos y luego lo pasamos a string
-                        payload_encriptado = message["payload"].encode("utf-8")
-                        payload_desencriptado = cipher.decrypt(payload_encriptado).decode("utf-8")
-                        
-                        print(f"{message['group']}: {payload_desencriptado}")
-                    except Exception as e:
-                        print(f"Error al desencriptar el mensaje de {ip_address}: {e}")
-                        
+
+Una vez reiniciados ambos procesos, el flujo de comunicación funcionó correctamente: el cliente continuó transmitiendo información cifrada a través de la red mientras que el servidor logró reconstruir e imprimir el contenido original en tiempo real.
+
+![Código cliente con clave compartida](https://hackmd.io/_uploads/B11L7iQkGe.png)
+
+_**Figura 13.** Cliente enviando mensajes cifrados mediante Fernet utilizando una clave simétrica compartida._
+
+![Código servidor con clave compartida](https://hackmd.io/_uploads/ByrdQsXyMl.png)
+
+_**Figura 14.** El servidor ejecuta exitosamente decrypt(), recuperando el contenido original de los mensajes enviados ("hello", "que genial", etc.)._
+
+#### Paso 3: Análisis y auditoría de tráfico en la red (Wireshark)
+
+Como validación experimental final del mecanismo de protección implementado, realizamos una captura de tráfico utilizando Wireshark sobre la interfaz de loopback local, filtrando exclusivamente los paquetes pertenecientes al canal TCP utilizado por nuestra aplicación.
+
+```text
+tcp.port == 5050
 ```
 
-Codigo del lado del cliente:
+**Paquete inspeccionado:**
 
-![image](https://hackmd.io/_uploads/ByrdQsXyMl.png)
+![Captura Wireshark de payload protegida](https://hackmd.io/_uploads/ByXDoas1zg.png)
 
+_**Figura 15.** Inspección de una trama TCP mediante Wireshark. El campo payload permanece completamente cifrado durante la transmisión, mientras que únicamente la metadata no sensible (group) puede visualizarse en texto plano._
 
-Como se observo en las terminales de ambos lados el mensaje fue legible pero encriptado osea que nadie por fuera del del lciente o el servidor uede descifrar el mensaje.
+La captura evidencia que la información sensible jamás circula en formato legible dentro del canal de comunicación. Incluso interceptando directamente los paquetes de red, un atacante únicamente observaría tokens cifrados protegidos mediante AES, autenticados mediante HMAC-SHA256 y codificados en Base64 URL-safe, imposibilitando la recuperación del contenido original sin poseer previamente la clave criptográfica compartida.
